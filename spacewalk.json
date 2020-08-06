@@ -98,7 +98,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT (*)\nFROM public.rhnserver",
+          "rawSql": "SELECT COUNT (*) FROM public.rhnserver",
           "refId": "A",
           "select": [
             [
@@ -323,7 +323,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "        select count (distinct system_id) from (\n  select S.id as system_id,\n    S.org_id as org_id,\n    PN.name as package_name,\n    OPE.epoch as package_epoch,\n    OPE.version as package_version,\n    OPE.release as package_release,\n    PA.label as package_arch,\n    NPE.epoch as newer_epoch,\n    NPE.version as newer_version,\n    NPE.release as newer_release\n  from rhnServer S\n    join rhnServerNeededCache SPC on S.id=SPC.server_id\n    join rhnPackage P on SPC.package_id=P.id\n    join rhnPackageName PN on P.name_id=PN.id\n    join rhnServerPackage SP on SP.server_id=S.id and SP.name_id=P.name_id\n    join rhnPackageArch PA on SP.package_arch_id=PA.id\n    join rhnPackageEvr OPE on OPE.id=SP.evr_id\n    join rhnPackageEvr NPE on NPE.id=P.evr_id\n        ) X\n",
+          "rawSql": "        select count (distinct system_id) from (select S.id as system_id, S.org_id as org_id, PN.name as package_name, OPE.epoch as package_epoch, OPE.version as package_version, OPE.release as package_release, PA.label as package_arch, NPE.epoch as newer_epoch, NPE.version as newer_version, NPE.release as newer_release from rhnServer S join rhnServerNeededCache SPC on S.id=SPC.server_id join rhnPackage P on SPC.package_id=P.id join rhnPackageName PN on P.name_id=PN.id join rhnServerPackage SP on SP.server_id=S.id and SP.name_id=P.name_id join rhnPackageArch PA on SP.package_arch_id=PA.id join rhnPackageEvr OPE on OPE.id=SP.evr_id join rhnPackageEvr NPE on NPE.id=P.evr_id ) X",
           "refId": "A",
           "select": [
             [
@@ -607,7 +607,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "rawQuery": true,
-          "rawSql": "select * from (\n                select rhnErrata.advisory_name as advisory,\n                        rhnErrata.advisory_type as type,\n                        rhnCVE.name as cve,\n                        rhnErrata.synopsis,\n                        count(*) as systems_affected\n                from rhnErrata left outer join rhnErrataCVE\n                        on rhnErrata.id = rhnErrataCVE.errata_id\n                        left outer join rhnCVE\n                        on rhnErrataCVE.cve_id = rhnCVE.id\n                        , rhnServerNeededErrataCache\n                where rhnErrata.id = rhnServerNeededErrataCache.errata_id\n                group by rhnErrata.id,\n                        rhnErrata.advisory_name,\n                        rhnErrata.advisory_type,\n                        rhnCVE.name,\n                        rhnErrata.synopsis\n                ) X\n                -- where placeholder\n                order by advisory, cve;\n",
+          "rawSql": "select * from (select rhnErrata.advisory_name as advisory,  rhnErrata.advisory_type as type, rhnCVE.name as cve,rhnErrata.synopsis, count(*) as systems_affected from rhnErrata left outer join rhnErrataCVE on rhnErrata.id = rhnErrataCVE.errata_id left outer join rhnCVE on rhnErrataCVE.cve_id = rhnCVE.id, rhnServerNeededErrataCache where rhnErrata.id = rhnServerNeededErrataCache.errata_id group by rhnErrata.id, rhnErrata.advisory_name, rhnErrata.advisory_type, rhnCVE.name, rhnErrata.synopsis) X -- where placeholder order by advisory, cve;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -802,7 +802,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "rawQuery": true,
-          "rawSql": "select * from (\n                select rhnErrata.advisory_name as advisory,\n                        rhnServerNeededErrataCache.server_id,\n                        rhnServer.name as profile_name,\n                        rhnservernetwork.hostname, trim(rhnservernetwork.ipaddr) as ip_address,\n                        trim(rhnservernetwork.ip6addr) as ipv6_address\n                from rhnErrata, rhnServer,\n                        rhnServerNeededErrataCache left outer join\n                        (\n                        select server_id, hostname, ipaddr, ip6addr\n                        from rhnservernetwork\n                        where id in (\n                                select min(id)\n                                from rhnservernetwork\n                                group by server_id\n                                )\n                        ) rhnservernetwork\n                        on rhnServerNeededErrataCache.server_id = rhnservernetwork.server_id\n                where rhnErrata.id = rhnServerNeededErrataCache.errata_id\n                        and rhnServerNeededErrataCache.server_id = rhnServer.id\n                ) X\n                -- where placeholder\n                order by advisory, server_id\n",
+          "rawSql": "select * from (select rhnErrata.advisory_name as advisory, rhnServerNeededErrataCache.server_id, rhnServer.name as profile_name, rhnservernetwork.hostname, trim(rhnservernetwork.ipaddr) as ip_address, trim(rhnservernetwork.ip6addr) as ipv6_address from rhnErrata, rhnServer, rhnServerNeededErrataCache left outer join(select server_id, hostname, ipaddr, ip6addr from rhnservernetwork where id in (select min(id) from rhnservernetwork group by server_id) ) rhnservernetwork on rhnServerNeededErrataCache.server_id = rhnservernetwork.server_id where rhnErrata.id = rhnServerNeededErrataCache.errata_id and rhnServerNeededErrataCache.server_id = rhnServer.id ) X -- where placeholder order by advisory, server_id",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
